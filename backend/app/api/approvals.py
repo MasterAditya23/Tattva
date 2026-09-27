@@ -1,44 +1,48 @@
-from fastapi import APIRouter, HTTPException
-from app.database.models import IncidentResponse
-from app.api.incidents import fake_db
-
-# Import our new Executor and Verifier
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
+from app.database.models import IncidentResponse, IncidentDB
+from app.database.database import get_db
 from app.actions.executor import execute_remediation
 from app.verification.recovery import check_health
 
 router = APIRouter()
 
 @router.post("/{incident_id}/approve", response_model=IncidentResponse)
-def approve_incident(incident_id: str):
-    if incident_id not in fake_db:
+def approve_incident(incident_id: str, db: Session = Depends(get_db)):
+    incident = db.query(IncidentDB).filter(IncidentDB.id == incident_id).first()
+    
+    if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
     
-    incident = fake_db[incident_id]
-    if incident["status"] != "PENDING_APPROVAL":
+    if incident.status != "PENDING_APPROVAL":
         raise HTTPException(status_code=400, detail="Incident is not pending approval")
     
-    # 1. Trigger Action Executor
-    success = execute_remediation(incident["recommended_action"], incident["resource_id"])
+    success = execute_remediation(incident.recommended_action, incident.resource_id)
     
     if success:
-        incident["status"] = "EXECUTING"
+        incident.status = "EXECUTING"
+        db.commit()
         
-        # 2. Trigger Recovery Verification
-        final_status = check_health(incident["resource_id"])
-        incident["status"] = final_status
+        final_status = check_health(incident.resource_id)
+        incident.status = final_status
     else:
-        incident["status"] = "FAILED"
+        incident.status = "FAILED"
         
+    db.commit()
+    db.refresh(incident)
     return incident
 
 @router.post("/{incident_id}/reject", response_model=IncidentResponse)
-def reject_incident(incident_id: str):
-    if incident_id not in fake_db:
+def reject_incident(incident_id: str, db: Session = Depends(get_db)):
+    incident = db.query(IncidentDB).filter(IncidentDB.id == incident_id).first()
+    
+    if not incident:
         raise HTTPException(status_code=404, detail="Incident not found")
     
-    incident = fake_db[incident_id]
-    if incident["status"] != "PENDING_APPROVAL":
+    if incident.status != "PENDING_APPROVAL":
         raise HTTPException(status_code=400, detail="Incident is not pending approval")
     
-    incident["status"] = "REJECTED"
+    incident.status = "REJECTED"
+    db.commit()
+    db.refresh(incident)
     return incident
