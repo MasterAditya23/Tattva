@@ -1,1 +1,4 @@
 sqlalchemy
+
+google-generativeai
+python-dotenv
