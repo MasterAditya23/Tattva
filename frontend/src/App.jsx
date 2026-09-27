@@ -8,7 +8,7 @@ import {
   Search, CheckCircle, Clock, Zap, RefreshCw, Server, AlertOctagon, Terminal
 } from 'lucide-react';
 
-const API_URL = '[https://tattva-production.up.railway.app](https://tattva-production.up.railway.app)';
+const API_URL = 'https://tattva-production.up.railway.app';
 
 export default function App() {
   const [incidents, setIncidents] = useState([]);
