@@ -1,13 +1,29 @@
-def evaluate_risk(proposed_action: str) -> str:
-    # Our strict allowlist of safe, automatable actions
-    SAFE_ACTIONS = ["RESTART_SERVICE"]
+def evaluate_risk(action: str) -> str:
+    # Define exact actions that require human approval
+    high_risk_actions = [
+        "RESTART_SERVER", 
+        "DELETE_DATA", 
+        "MANUAL_INVESTIGATION", 
+        "CLEAR_DISK_SPACE",
+        "SHUTDOWN_SYSTEM"
+    ]
     
-    # High-risk actions that require a human to click 'APPROVE'
-    HIGH_RISK_ACTIONS = ["RESTART_PROCESS"]
+    # Define actions safe for autonomous execution
+    low_risk_actions = [
+        "RESTART_SERVICE", 
+        "RESTART_PROCESS", 
+        "CLEAR_TEMP_FILES",
+        "RELOAD_CONFIG"
+    ]
     
-    if proposed_action in SAFE_ACTIONS:
-        return "LOW_RISK"
-    elif proposed_action in HIGH_RISK_ACTIONS:
+    # Normalize the action string to avoid case-sensitivity bugs
+    safe_action = action.upper().strip() if action else ""
+    
+    if safe_action in high_risk_actions:
         return "HIGH_RISK"
+    elif safe_action in low_risk_actions:
+        return "LOW_RISK"
     else:
-        return "UNKNOWN_RISK"
+        # FAIL-SAFE: If the AI suggests a brand new action we haven't whitelisted,
+        # we lock it down and force human approval.
+        return "HIGH_RISK"
