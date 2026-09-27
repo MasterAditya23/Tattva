@@ -17,8 +17,8 @@ Tattva is an AI-assisted infrastructure incident detection, diagnosis, and safe 
 * **Recovery Verification:** Database logging to validate system recovery post-remediation.
 
 ## Live Project Links
-* **Live Application:** [Insert your Vercel Link]
-* **Backend API Docs:** [Insert your Railway Link]/docs
+* **Live Application:** https://tattva-woad.vercel.app/
+* **Backend API Docs:** https://tattva-production.up.railway.app
 
 ## Local Setup Instructions
 
