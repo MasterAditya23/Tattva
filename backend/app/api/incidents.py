@@ -5,29 +5,34 @@ import uuid
 from app.database.models import IncidentCreate, IncidentResponse
 from app.ai.diagnosis import analyze_incident
 from app.rules.risk_engine import evaluate_risk
+from app.actions.executor import execute_remediation
+from app.verification.recovery import check_health
 
 router = APIRouter()
-
-# Temporary in-memory database
 fake_db = {}
 
 @router.post("/", response_model=IncidentResponse)
 def create_incident(incident: IncidentCreate):
     incident_id = f"INC-{str(uuid.uuid4())[:8].upper()}"
     
-    # 1. AI Analyzes the Problem
+    # 1. AI Analyzes
     ai_result = analyze_incident(incident.problem_description)
     diagnosis = ai_result["diagnosis"]
     action = ai_result["action"]
     
-    # 2. Rule Engine Evaluates Risk
+    # 2. Rules Evaluate Risk
     risk = evaluate_risk(action)
     
-    # 3. Determine Status based on Risk
+    # 3. Automation Routing
     if risk == "HIGH_RISK":
         status = "PENDING_APPROVAL"
     elif risk == "LOW_RISK":
-        status = "APPROVED" # Ready for auto-execution
+        # Auto-execution flow!
+        success = execute_remediation(action, incident.resource_id)
+        if success:
+            status = check_health(incident.resource_id)
+        else:
+            status = "FAILED"
     else:
         status = "MANUAL_REVIEW"
         
