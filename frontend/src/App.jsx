@@ -8,7 +8,7 @@ import {
   Search, CheckCircle, Clock, Zap, RefreshCw, Server, AlertOctagon, Terminal
 } from 'lucide-react';
 
-const API_URL = 'http://127.0.0.1:8000';
+const API_URL = '[https://tattva-production.up.railway.app](https://tattva-production.up.railway.app)';
 
 export default function App() {
   const [incidents, setIncidents] = useState([]);
@@ -309,7 +309,7 @@ export default function App() {
                   <div className="flex items-center gap-3">
                     <Terminal size={16} className="text-slate-400" />
                     <span className="text-xs font-mono text-slate-300">
-                      root@{activeTerminal.resource_id} — Tattva Execution Environment
+                      root@{activeTerminal.resource_id} ï¿½ Tattva Execution Environment
                     </span>
                   </div>
                   <div className="flex gap-2">
